@@ -1,20 +1,20 @@
-{
-    "utilisateur1" : {
+[
+    {
         "nom" : "Dupont",
         "prenom" : "Jean",
         "email" : "Jean.Dupont@gnail.com",
         "age" : 25 
     },
-    "utilisateur2" : {
+    {
         "nom" : "Martin",
         "prenom" : "Marie",
         "email" : "Marie.Martin@gmail.com",
         "age" : 30
     },
-    "utilisateur3" : {
+    {
         "nom" : "Durand",
         "prenom" : "Pierre",
         "email" : "Pierre.Durand@gmail.com",
         "age" : 28
     }
-}
+]

@@ -1,0 +1,22 @@
+{
+    "name": "montee-en-competences",
+    "main": "server.js",
+    "scripts": {
+        "start": "node --watch server.js"
+    },
+    "dependencies": {
+        "express": "^4.21.2"
+    },
+    "version": "1.0.0",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Georgio-Azar/MonteeEnCompetences.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Georgio-Azar/MonteeEnCompetences/issues"
+    },
+    "homepage": "https://github.com/Georgio-Azar/MonteeEnCompetences#readme",
+    "description": ""
+}

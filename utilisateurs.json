@@ -1,23 +1,30 @@
 [
-    {
-        "id" : 1,
-        "nom" : "Dupont",
-        "prenom" : "Jean",
-        "email" : "Jean.Dupont@gnail.com",
-        "age" : 25
-    },
-    {
-        "id" : 2,
-        "nom" : "Martin",
-        "prenom" : "Marie",
-        "email" : "Marie.Martin@gmail.com",
-        "age" : 30
-    },
-    {
-        "id" : 3,
-        "nom" : "Durand",
-        "prenom" : "Pierre",
-        "email" : "Pierre.Durand@gmail.com",
-        "age" : 28
-    }
+  {
+    "id": 1,
+    "nom": "Dupont",
+    "prenom": "Jean",
+    "email": "Jean.Dupont@gnail.com",
+    "age": 25
+  },
+  {
+    "id": 2,
+    "nom": "Martin",
+    "prenom": "Marie",
+    "email": "Marie.Martin@gmail.com",
+    "age": 30
+  },
+  {
+    "id": 3,
+    "nom": "Durand",
+    "prenom": "Pierre",
+    "email": "Pierre.Durand@gmail.com",
+    "age": 28
+  },
+  {
+    "nom": "Jean",
+    "prenom": "Henri",
+    "email": "Jean.Henri@gmail.com",
+    "age": 30,
+    "id": "4fcafaed-9587-453a-8e76-21f5cbc21938"
+  }
 ]

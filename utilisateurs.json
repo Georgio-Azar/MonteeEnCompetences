@@ -4,7 +4,8 @@
     "nom": "Dupont",
     "prenom": "Jean",
     "email": "Jean.Dupont@gmail.com",
-    "age": 25
+    "age": 10,
+    "password": "$2b$10$GACTSMJ.7v8R9CwuIQ4s6OWEOZ96qMusJadMBKQKj5aGgaBGQ3Ei."
   },
   {
     "id": 2,
@@ -26,5 +27,13 @@
     "email": "Eric.Andre@mail.com",
     "age": 55,
     "id": "b88b6429-6c0d-4de9-8587-a56cbfea2a0b"
+  },
+  {
+    "nom": "Azar",
+    "prenom": "Georgio",
+    "email": "Georgio.Azar@gmail.com",
+    "age": 21,
+    "password": "$2b$10$yScj8ppaqM3isqBo20aDlOS9TH.Blqq2o5x0y4gEUy6sTmF/lGllW",
+    "id": "130a0a21-8a4e-4725-9414-52f542f7eecb"
   }
 ]

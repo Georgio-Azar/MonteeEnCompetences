@@ -1,16 +1,26 @@
+import {Request, Response} from 'express';
 import fs from 'fs';
 import crypto from 'crypto';
 
-import usersModel from '../models/usersModel.js';
+import usersModel from '../models/usersModel.ts';
 
-function getUsers (req, res) {
+type User = {
+    id: string;
+    nom: string;
+    prenom: string;
+    age: number;
+    email: string;
+    password: string;
+}
+
+function getUsers (req : Request, res : Response) {
     try {
         console.log('Reading file...');
         const data = fs.readFileSync('utilisateurs.json', 'utf8');
         console.log('File read successfully');
-        const users = JSON.parse(data);
+        const users : User[] = JSON.parse(data);
         let result = "";
-        users.forEach((user) => {
+        users.forEach((user : User) => {
             result += (`Nom: ${user.nom}, Prenom: ${user.prenom}, Age: ${user.age}, Mail : ${user.email}`);
             result += "<br>";
         }); 
@@ -22,14 +32,15 @@ function getUsers (req, res) {
     }
 }
 
-function getUsersById (req, res) {
-    const id = req.params.id;
+function getUsersById (req : Request, res : Response) {
+    const id : String = req.params.id;
     try {
         console.log('Reading file...');
         const data = fs.readFileSync('utilisateurs.json', 'utf8');
         console.log('File read successfully');
-        const users = JSON.parse(data);
-        const user = users.find(user => user.id == id);
+        const users : User[] = JSON.parse(data);
+        const user = users.find((user : User) => String(user.id) === id);
+        console.log(user);
         if (user) {
             res.send(`Nom: ${user.nom}, Prenom: ${user.prenom}, Age: ${user.age}, Mail : ${user.email}`);
         } else {
@@ -42,7 +53,7 @@ function getUsersById (req, res) {
     }
 }
 
-async function addUser (req, res) {
+async function addUser (req : Request, res : Response) {
     const newUser = req.body;
     try {
         console.log('Reading file...');
@@ -53,7 +64,7 @@ async function addUser (req, res) {
         }
         const data = fs.readFileSync('utilisateurs.json', 'utf8');
         console.log('File read successfully');
-        const users = JSON.parse(data);
+        const users : User[]= JSON.parse(data);
         newUser.id = crypto.randomUUID();
         if (users.find(user => user.email === newUser.email)) {
             res.status(400).send('Email already exists');
@@ -70,14 +81,14 @@ async function addUser (req, res) {
     }
 }
 
-async function modifyUser (req, res) {
+async function modifyUser (req : Request, res : Response) {
     const id = req.params.id;
     const updatedUser = req.body;
     try {
         console.log('Reading file...');
         const data = fs.readFileSync('utilisateurs.json', 'utf8');
         console.log('File read successfully');
-        const users = JSON.parse(data);
+        const users : User[] = JSON.parse(data);
         if (updatedUser.password !== undefined) {
             updatedUser.password = await usersModel.hashPassword(updatedUser.password);
         }
@@ -96,13 +107,13 @@ async function modifyUser (req, res) {
     }
 }
 
-function deleteUser (req, res) {
+function deleteUser (req : Request, res : Response) {
     const id = req.params.id;
     try {
         console.log('Reading file...');
         const data = fs.readFileSync('utilisateurs.json', 'utf8');
         console.log('File read successfully');
-        const users = JSON.parse(data);
+        const users : User[] = JSON.parse(data);
         const userIndex = users.findIndex(user => user.id == id);
         if (userIndex !== -1) {
             users.splice(userIndex, 1);

@@ -1,7 +1,7 @@
 import express from 'express';
 
-import index from './routes/index.js';
-import users from './routes/users.js';
+import index from './routes/index.ts';
+import users from './routes/users.ts';
 
 const app = express();
 const PORT = 3000;

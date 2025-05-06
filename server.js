@@ -85,18 +85,17 @@ app.post('/users', express.json(), async (req, res) => {
     }
 });
 
-app.put('/users/:id', express.json(), (req, res) => {
+app.put('/users/:id', express.json(), async (req, res) => {
     const id = req.params.id;
     const updatedUser = req.body;
     try {
-        if (updatedUser.nom === undefined || updatedUser.prenom === undefined || updatedUser.age === undefined || updatedUser.email === undefined) {
-            res.status(400).send('Missing user information');
-            return;
-        }
         console.log('Reading file...');
         const data = fs.readFileSync('utilisateurs.json', 'utf8');
         console.log('File read successfully');
         const users = JSON.parse(data);
+        if (updatedUser.password !== undefined) {
+            updatedUser.password = await hashPassword(updatedUser.password);
+        }
         const userIndex = users.findIndex(user => user.id == id);
         if (userIndex !== -1) {
             users[userIndex] = { ...users[userIndex], ...updatedUser };

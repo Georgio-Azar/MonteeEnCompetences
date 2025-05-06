@@ -1,6 +1,7 @@
 import express from 'express';
 import fs from 'fs';
 import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 
 const app = express();
 const PORT = 3000;
@@ -9,6 +10,12 @@ app.get('/', (req, res) => {
     res.send('Hello World!');
     }
 );
+
+async function hashPassword(password) {
+    const saltRounds = 10;
+    const hash = await bcrypt.hash(password, saltRounds);
+    return hash;
+}
 
 app.get('/users', (req, res) => {
     try {

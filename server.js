@@ -76,4 +76,33 @@ app.post('/users', express.json(), (req, res) => {
     }
 });
 
+app.put('/users/:id', express.json(), (req, res) => {
+    const id = req.params.id;
+    const updatedUser = req.body;
+    try {
+        if (updatedUser.nom === undefined || updatedUser.prenom === undefined || updatedUser.age === undefined || updatedUser.email === undefined) {
+            res.status(400).send('Missing user information');
+            return;
+        }
+        console.log('Reading file...');
+        const data = fs.readFileSync('utilisateurs.json', 'utf8');
+        console.log('File read successfully');
+        const users = JSON.parse(data);
+        const userIndex = users.findIndex(user => user.id == id);
+        if (userIndex !== -1) {
+            users[userIndex] = { ...users[userIndex], ...updatedUser };
+            fs.writeFileSync('utilisateurs.json', JSON.stringify(users, null, 2));
+            res.send('User updated successfully');
+        } else {
+            res.status(404).send('User not found');
+        }
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send('Error writing file');
+    }
+});
+
+
+
 app.listen(PORT, () => {});

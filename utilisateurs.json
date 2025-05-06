@@ -3,7 +3,7 @@
     "id": 1,
     "nom": "Dupont",
     "prenom": "Jean",
-    "email": "Jean.Dupont@gnail.com",
+    "email": "Jean.Dupont@gmail.com",
     "age": 25
   },
   {
@@ -21,10 +21,10 @@
     "age": 28
   },
   {
-    "nom": "Jean",
-    "prenom": "Henri",
-    "email": "Jean.Henri@gmail.com",
-    "age": 30,
-    "id": "4fcafaed-9587-453a-8e76-21f5cbc21938"
+    "nom": "Andre",
+    "prenom": "Eric",
+    "email": "Eric.Andre@mail.com",
+    "age": 55,
+    "id": "b88b6429-6c0d-4de9-8587-a56cbfea2a0b"
   }
 ]

@@ -103,6 +103,26 @@ app.put('/users/:id', express.json(), (req, res) => {
     }
 });
 
-
+app.delete('/users/:id', (req, res) => {
+    const id = req.params.id;
+    try {
+        console.log('Reading file...');
+        const data = fs.readFileSync('utilisateurs.json', 'utf8');
+        console.log('File read successfully');
+        const users = JSON.parse(data);
+        const userIndex = users.findIndex(user => user.id == id);
+        if (userIndex !== -1) {
+            users.splice(userIndex, 1);
+            fs.writeFileSync('utilisateurs.json', JSON.stringify(users, null, 2));
+            res.send('User deleted successfully');
+        } else {
+            res.status(404).send('User not found');
+        }
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send('Error writing file');
+    }
+});
 
 app.listen(PORT, () => {});

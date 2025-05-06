@@ -33,14 +33,13 @@ function getUsers (req : Request, res : Response) {
 }
 
 function getUsersById (req : Request, res : Response) {
-    const id : String = req.params.id;
+    const id = req.params.id;
     try {
         console.log('Reading file...');
         const data = fs.readFileSync('utilisateurs.json', 'utf8');
         console.log('File read successfully');
         const users : User[] = JSON.parse(data);
-        const user = users.find((user : User) => String(user.id) === id);
-        console.log(user);
+        const user = users.find(user => String(user.id) === id);
         if (user) {
             res.send(`Nom: ${user.nom}, Prenom: ${user.prenom}, Age: ${user.age}, Mail : ${user.email}`);
         } else {
@@ -91,6 +90,12 @@ async function modifyUser (req : Request, res : Response) {
         const users : User[] = JSON.parse(data);
         if (updatedUser.password !== undefined) {
             updatedUser.password = await usersModel.hashPassword(updatedUser.password);
+        }
+        if (updatedUser.email !== undefined) {
+            if (users.find(user => user.email === updatedUser.email)) {
+                res.status(400).send('Email already exists');
+                return;
+            }
         }
         const userIndex = users.findIndex(user => user.id == id);
         if (userIndex !== -1) {

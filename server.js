@@ -62,6 +62,10 @@ app.post('/users', express.json(), (req, res) => {
         console.log('File read successfully');
         const users = JSON.parse(data);
         newUser.id = crypto.randomUUID();
+        if (users.find(user => user.email === newUser.email)) {
+            res.status(400).send('Email already exists');
+            return;
+        }
         users.push(newUser);
         fs.writeFileSync('utilisateurs.json', JSON.stringify(users, null, 2));
         res.status(201).send('User added successfully');

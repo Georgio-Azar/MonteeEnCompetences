@@ -57,11 +57,12 @@ app.get('/users/:id', (req, res) => {
 });
 
 
-app.post('/users', express.json(), (req, res) => {
+app.post('/users', express.json(), async (req, res) => {
     const newUser = req.body;
     try {
         console.log('Reading file...');
-        if (newUser.nom === undefined || newUser.prenom === undefined || newUser.age === undefined || newUser.email === undefined) {
+        if (newUser.nom === undefined || newUser.prenom === undefined || 
+            newUser.age === undefined || newUser.email === undefined || newUser.password === undefined) {
             res.status(400).send('Missing user information');
             return;
         }
@@ -73,6 +74,7 @@ app.post('/users', express.json(), (req, res) => {
             res.status(400).send('Email already exists');
             return;
         }
+        newUser.password = await hashPassword(newUser.password);
         users.push(newUser);
         fs.writeFileSync('utilisateurs.json', JSON.stringify(users, null, 2));
         res.status(201).send('User added successfully');

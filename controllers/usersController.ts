@@ -2,8 +2,10 @@ import {Request, Response} from 'express';
 import fs from 'fs';
 import crypto from 'crypto';
 
-import usersModel from '../models/usersModel.ts';
-import { addUserSchema, modifyUserSchema } from '../schemas/usersSchemas.ts';
+import usersModel from '../models/usersModel';
+import { addUserSchema, modifyUserSchema } from '../schemas/usersSchemas';
+
+import logger from '../logs/logger';
 
 type User = {
     id: string;
@@ -15,9 +17,10 @@ type User = {
 }
 
 function getUsers (req : Request, res : Response) {
+    logger.http(`${req.method} /users - ${req.ip}`);
     try {
         console.log('Reading file...');
-        const data = fs.readFileSync('utilisateurs.json', 'utf8');
+        const data = fs.readFileSync('utilisateurs.jon', 'utf8');
         console.log('File read successfully');
         const users : User[] = JSON.parse(data);
         let result = "";
@@ -28,12 +31,14 @@ function getUsers (req : Request, res : Response) {
         res.send(result);
     }
     catch (err) {
+        logger.error(err);
         console.error(err);
         res.status(500).send('Error reading file');
     }
 }
 
 function getUsersById (req : Request, res : Response) {
+    logger.http(`${req.method} /users${req.url} - ${req.ip}`);
     const id = req.params.id;
     try {
         console.log('Reading file...');

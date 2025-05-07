@@ -6,7 +6,7 @@ export const addUserSchema = z.object({
     prenom : z.string().min(1),
     age : z.number().int().positive(),
     email : z.string().email(),
-    password : z.string().min(8)
+    password : z.string().min(12)
 })
 
 export const modifyUserSchema = z.object({
@@ -15,5 +15,5 @@ export const modifyUserSchema = z.object({
     prenom : z.string().min(1).optional(),
     age : z.number().int().positive().optional(),
     email : z.string().email().optional(),
-    password : z.string().min(8).optional()
+    password : z.string().min(12).optional()
 })

@@ -72,6 +72,11 @@ async function addUser (req : Request, res : Response) {
             res.status(400).send('Email already exists');
             return;
         }
+        let passwordError = usersModel.checkPassword(validatedUser.password);
+        if (passwordError !== "") {
+            res.status(400).send(passwordError);
+            return;
+        } 
         validatedUser.password = await usersModel.hashPassword(validatedUser.password);
         let userToAdd : User = {
             id: validatedUser.id,
@@ -106,6 +111,16 @@ async function modifyUser (req : Request, res : Response) {
         console.log('File read successfully');
         const users : User[] = JSON.parse(data);
         if (validatedUser.password !== undefined) {
+            /*let regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*?&])[A-Za-z\d@.#$!%*?&]{12,}$/;
+            if (!regex.test(validatedUser.password)) {
+                res.status(400).send('Password must be at least 12 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character');
+                return;
+            }*/
+            let passwordError = usersModel.checkPassword(validatedUser.password);
+            if (passwordError !== "") {
+                res.status(400).send(passwordError);
+                return;
+            } 
             validatedUser.password = await usersModel.hashPassword(validatedUser.password);
         }
         if (validatedUser.email !== undefined) {

@@ -35,5 +35,21 @@
     "age": 21,
     "password": "$2b$10$yScj8ppaqM3isqBo20aDlOS9TH.Blqq2o5x0y4gEUy6sTmF/lGllW",
     "id": "130a0a21-8a4e-4725-9414-52f542f7eecb"
+  },
+  {
+    "id": "116a4581-ffa9-4c03-85dd-0758cb21043a",
+    "nom": "Dupont",
+    "prenom": "Jean",
+    "age": 10,
+    "email": "Jean.Dupnt@gmail.com",
+    "password": "$2b$10$hBIaWRWDg7.HGZlGh0nQW.3nBiOdoHdbKjZ9Bk1vJSUS4tb5Q5kKm"
+  },
+  {
+    "id": "6745db9a-58c8-41b1-bc11-12b5c8203b63",
+    "nom": "Olive",
+    "prenom": "Tom",
+    "age": 25,
+    "email": "OliveetTom@mail.com",
+    "password": "$2b$10$2q3jlQ8gDYg0iXlDsmdMJOijhGNkaIGN2Dc1dOZyLy/o9VTnv0MZy"
   }
 ]

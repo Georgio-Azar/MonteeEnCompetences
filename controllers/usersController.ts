@@ -1,7 +1,6 @@
 import {Request, Response} from 'express';
 import fs from 'fs';
 import crypto from 'crypto';
-import {z} from 'zod';
 
 import usersModel from '../models/usersModel.ts';
 import { addUserSchema, modifyUserSchema } from '../schemas/usersSchemas.ts';

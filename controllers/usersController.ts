@@ -1,8 +1,10 @@
 import {Request, Response} from 'express';
 import fs from 'fs';
 import crypto from 'crypto';
+import {z} from 'zod';
 
 import usersModel from '../models/usersModel.ts';
+import { addUserSchema } from '../schemas/usersSchemas.ts';
 
 type User = {
     id: string;
@@ -54,23 +56,32 @@ function getUsersById (req : Request, res : Response) {
 
 async function addUser (req : Request, res : Response) {
     const newUser = req.body;
+    const parsedUser = addUserSchema.safeParse(newUser);
+    if (!parsedUser.success) {
+        res.status(400).send(parsedUser.error.format());
+        return;
+    }
+    const validatedUser = parsedUser.data;
     try {
         console.log('Reading file...');
-        if (newUser.nom === undefined || newUser.prenom === undefined || 
-            newUser.age === undefined || newUser.email === undefined || newUser.password === undefined) {
-            res.status(400).send('Missing user information');
-            return;
-        }
         const data = fs.readFileSync('utilisateurs.json', 'utf8');
         console.log('File read successfully');
         const users : User[]= JSON.parse(data);
-        newUser.id = crypto.randomUUID();
-        if (users.find(user => user.email === newUser.email)) {
+        validatedUser.id = crypto.randomUUID();
+        if (users.find(user => user.email === validatedUser.email)) {
             res.status(400).send('Email already exists');
             return;
         }
-        newUser.password = await usersModel.hashPassword(newUser.password);
-        users.push(newUser);
+        validatedUser.password = await usersModel.hashPassword(validatedUser.password);
+        let userToAdd : User = {
+            id: validatedUser.id,
+            nom: validatedUser.nom,
+            prenom: validatedUser.prenom,
+            age: validatedUser.age,
+            email: validatedUser.email,
+            password: validatedUser.password
+        };
+        users.push(userToAdd);
         fs.writeFileSync('utilisateurs.json', JSON.stringify(users, null, 2));
         res.status(201).send('User added successfully');
     }

@@ -122,7 +122,6 @@ async function modifyUser (req : Request, res : Response) {
         if (validatedUser.password !== undefined) {
             let passwordError = usersModel.checkPassword(validatedUser.password);
             if (passwordError !== "") {
-                logger.error(passwordError);
                 res.status(400).send(passwordError);
                 return;
             } 
@@ -130,7 +129,6 @@ async function modifyUser (req : Request, res : Response) {
         }
         if (validatedUser.email !== undefined) {
             if (users.find(user => user.email === validatedUser.email)) {
-                logger.error('Email already exists');
                 res.status(400).send('Email already exists');
                 return;
             }
@@ -142,7 +140,6 @@ async function modifyUser (req : Request, res : Response) {
             logger.info(`User ${validatedUser.nom} ${validatedUser.prenom} modified successfully`);
             res.send('User updated successfully');
         } else {
-            logger.error('User not found');
             res.status(404).send('User not found');
         }
     }
@@ -168,7 +165,6 @@ function deleteUser (req : Request, res : Response) {
             logger.info(`User with id ${id} deleted successfully`);
             res.send('User deleted successfully');
         } else {
-            logger.error('User not found');
             res.status(404).send('User not found');
         }
     }

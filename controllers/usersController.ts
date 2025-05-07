@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import {z} from 'zod';
 
 import usersModel from '../models/usersModel.ts';
-import { addUserSchema } from '../schemas/usersSchemas.ts';
+import { addUserSchema, modifyUserSchema } from '../schemas/usersSchemas.ts';
 
 type User = {
     id: string;
@@ -94,23 +94,29 @@ async function addUser (req : Request, res : Response) {
 async function modifyUser (req : Request, res : Response) {
     const id = req.params.id;
     const updatedUser = req.body;
+    const parsedUser = modifyUserSchema.safeParse(updatedUser);
+    if (!parsedUser.success) {
+        res.status(400).send(parsedUser.error.format());
+        return;
+    }
+    const validatedUser = parsedUser.data;
     try {
         console.log('Reading file...');
         const data = fs.readFileSync('utilisateurs.json', 'utf8');
         console.log('File read successfully');
         const users : User[] = JSON.parse(data);
-        if (updatedUser.password !== undefined) {
-            updatedUser.password = await usersModel.hashPassword(updatedUser.password);
+        if (validatedUser.password !== undefined) {
+            validatedUser.password = await usersModel.hashPassword(validatedUser.password);
         }
-        if (updatedUser.email !== undefined) {
-            if (users.find(user => user.email === updatedUser.email)) {
+        if (validatedUser.email !== undefined) {
+            if (users.find(user => user.email === validatedUser.email)) {
                 res.status(400).send('Email already exists');
                 return;
             }
         }
         const userIndex = users.findIndex(user => user.id == id);
         if (userIndex !== -1) {
-            users[userIndex] = { ...users[userIndex], ...updatedUser };
+            users[userIndex] = { ...users[userIndex], ...validatedUser };
             fs.writeFileSync('utilisateurs.json', JSON.stringify(users, null, 2));
             res.send('User updated successfully');
         } else {

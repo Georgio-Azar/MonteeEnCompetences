@@ -4,17 +4,9 @@ import crypto from 'crypto';
 
 import usersModel from '../models/usersModel';
 import { addUserSchema, modifyUserSchema } from '../schemas/usersSchemas';
-
 import logger from '../logs/logger';
+import  User  from '../types/User';
 
-type User = {
-    id: string;
-    nom: string;
-    prenom: string;
-    age: number;
-    email: string;
-    password: string;
-}
 
 function getUsers (req : Request, res : Response) {
     logger.http(`${req.method} /users - ${req.ip}`);

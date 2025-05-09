@@ -7,4 +7,15 @@ type User = {
     password: string;
 }
 
-export default User;
+type userToModify = {
+    nom?: string;
+    prenom?: string;
+    age?: number;
+    email?: string;
+    password?: string;
+}
+
+export {
+    User,
+    userToModify
+}

@@ -1,15 +1,14 @@
 import { Sequelize, DataTypes } from "sequelize";
-import User from "../types/User";
+import { User } from "../types/User";
 
 export default (sequelize: Sequelize) => {
     const user = sequelize.define<any, User>(
         "user",
         {
             id : {
-                type: DataTypes.UUID,
+                type: DataTypes.STRING,
                 primaryKey: true,
                 allowNull: false,
-                defaultValue: DataTypes.UUIDV4,
             },
             nom: {
                 type: DataTypes.STRING,

@@ -5,21 +5,22 @@ import users from './routes/users';
 
 import db from './database';
 
-const app = express();
-const PORT = 3000;
+async function main() {
+    const app = express();
+    const PORT = 3000;
 
-(async () => {
     try {
         await db.sequelize.authenticate();
-        db.sequelize.sync({ force: true });
+        db.sequelize.sync();
         console.log('Connection has been established successfully.');
     }
     catch (error) {
         console.error('Unable to connect to the database:', error);
     }
-})();
 
-app.use("/", index);
-app.use("/users", users);
+    app.use("/", index);
+    app.use("/users", users);
+    app.listen(PORT, () => {});
+};
 
-app.listen(PORT, () => {});
+main();

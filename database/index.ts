@@ -13,7 +13,7 @@ const sequelize = new Sequelize(
 
 const db = {
     sequelize : sequelize,
-    result : user(sequelize)
+    users : user(sequelize)
 };
 
 export default db;

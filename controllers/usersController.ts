@@ -5,22 +5,25 @@ import crypto from 'crypto';
 import usersModel from '../models/usersModel';
 import { addUserSchema, modifyUserSchema } from '../schemas/usersSchemas';
 import logger from '../logs/logger';
-import  User  from '../types/User';
+import { User, userToModify }  from '../types/User';
+import userRepo from '../Repo/userRepo';
 
 
-function getUsers (req : Request, res : Response) {
+async function getUsers (req : Request, res : Response) {
     logger.http(`${req.method} /users - ${req.ip}`);
     try {
-        console.log('Reading file...');
-        const data = fs.readFileSync('utilisateurs.json', 'utf8');
-        console.log('File read successfully');
-        const users : User[] = JSON.parse(data);
-        let result = "";
-        users.forEach((user : User) => {
-            result += (`Nom: ${user.nom}, Prenom: ${user.prenom}, Age: ${user.age}, Mail : ${user.email}`);
-            result += "<br>";
-        }); 
-        res.send(result);
+        const usersFromDB = await userRepo.getUsersFromDB();
+        if (usersFromDB.length > 0) {
+            let result = "";
+            usersFromDB.forEach((user : User) => {
+                result += (`Nom: ${user.nom}, Prenom: ${user.prenom}, Age: ${user.age}, Mail : ${user.email}, ID: ${user.id}`);
+                result += "<br>";
+            });
+            res.send(result);
+        }
+        else {
+            res.status(404).send('No users found');
+        }
     }
     catch (err) {
         logger.error(err);
@@ -29,19 +32,16 @@ function getUsers (req : Request, res : Response) {
     }
 }
 
-function getUsersById (req : Request, res : Response) {
+async function getUsersById (req : Request, res : Response) {
     logger.http(`${req.method} /users${req.url} - ${req.ip}`);
     const id = req.params.id;
     try {
-        console.log('Reading file...');
-        const data = fs.readFileSync('utilisateurs.json', 'utf8');
-        console.log('File read successfully');
-        const users : User[] = JSON.parse(data);
-        const user = users.find(user => String(user.id) === id);
-        if (user) {
-            res.send(`Nom: ${user.nom}, Prenom: ${user.prenom}, Age: ${user.age}, Mail : ${user.email}`);
-        } else {
-            res.status(404).send('User not found');
+        const userFromDB = await userRepo.getUserByIdFromDB(id);
+        if (userFromDB !== null) {
+            res.send(`Nom: ${userFromDB.nom}, Prenom: ${userFromDB.prenom}, Age: ${userFromDB.age}, Mail : ${userFromDB.email}`);
+        }
+        else {
+            res.status(404).send('No users found');
         }
     }
     catch (err) {
@@ -56,20 +56,12 @@ async function addUser (req : Request, res : Response) {
     const newUser = req.body;
     const parsedUser = addUserSchema.safeParse(newUser);
     if (!parsedUser.success) {
-        res.status(400).send(parsedUser.error.format());
+        res.status(400).send(parsedUser.error.issues[0].message);
         return;
     }
     const validatedUser = parsedUser.data;
     try {
-        console.log('Reading file...');
-        const data = fs.readFileSync('utilisateurs.json', 'utf8');
-        console.log('File read successfully');
-        const users : User[]= JSON.parse(data);
         validatedUser.id = crypto.randomUUID();
-        if (users.find(user => user.email === validatedUser.email)) {
-            res.status(400).send('Email already exists');
-            return;
-        }
         let passwordError = usersModel.checkPassword(validatedUser.password);
         if (passwordError !== "") {
             res.status(400).send(passwordError);
@@ -84,15 +76,14 @@ async function addUser (req : Request, res : Response) {
             email: validatedUser.email,
             password: validatedUser.password
         };
-        users.push(userToAdd);
-        fs.writeFileSync('utilisateurs.json', JSON.stringify(users, null, 2));
-        logger.info(`User ${validatedUser.nom} ${validatedUser.prenom} added successfully`);
+        let newUser = await userRepo.addUserToDB(userToAdd);
+        logger.info(`User ${newUser.nom} ${newUser.prenom} - ${newUser.id} - added successfully`);
         res.status(201).send('User added successfully');
     }
     catch (err) {
         logger.error(err);
         console.error(err);
-        res.status(500).send('Error writing file');
+        res.status(500).send('Error while adding user');
     }
 }
 
@@ -107,10 +98,6 @@ async function modifyUser (req : Request, res : Response) {
     }
     const validatedUser = parsedUser.data;
     try {
-        console.log('Reading file...');
-        const data = fs.readFileSync('utilisateurs.json', 'utf8');
-        console.log('File read successfully');
-        const users : User[] = JSON.parse(data);
         if (validatedUser.password !== undefined) {
             let passwordError = usersModel.checkPassword(validatedUser.password);
             if (passwordError !== "") {
@@ -119,17 +106,9 @@ async function modifyUser (req : Request, res : Response) {
             } 
             validatedUser.password = await usersModel.hashPassword(validatedUser.password);
         }
-        if (validatedUser.email !== undefined) {
-            if (users.find(user => user.email === validatedUser.email)) {
-                res.status(400).send('Email already exists');
-                return;
-            }
-        }
-        const userIndex = users.findIndex(user => user.id == id);
-        if (userIndex !== -1) {
-            users[userIndex] = { ...users[userIndex], ...validatedUser };
-            fs.writeFileSync('utilisateurs.json', JSON.stringify(users, null, 2));
-            logger.info(`User ${validatedUser.nom} ${validatedUser.prenom} modified successfully`);
+        let updatedUser = await userRepo.modifyUserInDB(id, validatedUser);
+        if (updatedUser !== null) {
+            logger.info(`User ${updatedUser.nom} ${updatedUser.prenom} - ${updatedUser.id} modified successfully`);
             res.send('User updated successfully');
         } else {
             res.status(404).send('User not found');
@@ -142,18 +121,12 @@ async function modifyUser (req : Request, res : Response) {
     }
 }
 
-function deleteUser (req : Request, res : Response) {
+async function deleteUser (req : Request, res : Response) {
     logger.http(`${req.method} /users${req.url} - ${req.ip}`);
     const id = req.params.id;
     try {
-        console.log('Reading file...');
-        const data = fs.readFileSync('utilisateurs.json', 'utf8');
-        console.log('File read successfully');
-        const users : User[] = JSON.parse(data);
-        const userIndex = users.findIndex(user => user.id == id);
-        if (userIndex !== -1) {
-            users.splice(userIndex, 1);
-            fs.writeFileSync('utilisateurs.json', JSON.stringify(users, null, 2));
+        let promiseDelete = await userRepo.deleteUserInDB(id);
+        if (promiseDelete !== null) {
             logger.info(`User with id ${id} deleted successfully`);
             res.send('User deleted successfully');
         } else {

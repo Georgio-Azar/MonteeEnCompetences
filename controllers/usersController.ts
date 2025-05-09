@@ -20,7 +20,7 @@ function getUsers (req : Request, res : Response) {
     logger.http(`${req.method} /users - ${req.ip}`);
     try {
         console.log('Reading file...');
-        const data = fs.readFileSync('utilisateurs.jon', 'utf8');
+        const data = fs.readFileSync('utilisateurs.json', 'utf8');
         console.log('File read successfully');
         const users : User[] = JSON.parse(data);
         let result = "";

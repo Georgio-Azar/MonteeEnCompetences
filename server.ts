@@ -3,8 +3,30 @@ import express from 'express';
 import index from './routes/index';
 import users from './routes/users';
 
-import db from './database';
+import { sequelize } from './database';
 
+const app = express();
+const PORT = 3000;
+
+app.use("/", index);
+app.use("/users", users);
+
+async function startServer() {
+    try {
+        await sequelize.sync();
+        console.log('Connection has been established successfully.');
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    }
+    catch (error) {
+        console.error('Unable to connect to the database:', error);
+    }
+}
+
+startServer();
+
+/*
 async function main() {
     const app = express();
     const PORT = 3000;
@@ -23,4 +45,4 @@ async function main() {
     app.listen(PORT, () => {});
 };
 
-main();
+main();*/

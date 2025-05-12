@@ -5,8 +5,10 @@ import crypto from 'crypto';
 import usersModel from '../models/usersModel';
 import { addUserSchema, modifyUserSchema } from '../schemas/usersSchemas';
 import logger from '../logs/logger';
-import { User, userToModify }  from '../types/User';
+import { userToAdd, userToModify }  from '../types/User';
+import { User } from '../models/User';
 import userRepo from '../Repo/userRepo';
+import { CreationAttributes } from 'sequelize';
 
 
 async function getUsers (req : Request, res : Response) {
@@ -68,7 +70,7 @@ async function addUser (req : Request, res : Response) {
             return;
         } 
         validatedUser.password = await usersModel.hashPassword(validatedUser.password);
-        let userToAdd : User = {
+        let userInputToAdd : CreationAttributes<User> = {
             id: validatedUser.id,
             nom: validatedUser.nom,
             prenom: validatedUser.prenom,
@@ -76,7 +78,7 @@ async function addUser (req : Request, res : Response) {
             email: validatedUser.email,
             password: validatedUser.password
         };
-        let newUser = await userRepo.addUserToDB(userToAdd);
+        let newUser = await userRepo.addUserToDB(userInputToAdd);
         logger.info(`User ${newUser.nom} ${newUser.prenom} - ${newUser.id} - added successfully`);
         res.status(201).send('User added successfully');
     }

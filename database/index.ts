@@ -1,19 +1,18 @@
-import { Sequelize, Options } from "sequelize";
+import { Sequelize } from 'sequelize-typescript';
+import { User } from '../models/User';
 
-import configEnv from "../config";
-import user from "../models/User";
-
-const config = configEnv["development"];
-const sequelize = new Sequelize(
-    config.database,
-    config.username,
-    config.password,
-    config as Options
-)
-
-const db = {
-    sequelize : sequelize,
-    users : user(sequelize)
-};
-
-export default db;
+export const sequelize = new Sequelize({
+    dialect: 'postgres',
+    host: 'localhost',
+    username: 'root',
+    password: 'root',
+    database: 'database',
+    port: 5432,
+    pool: {
+        max: 5,
+        min: 0,
+        acquire: 30000,
+        idle: 10000,
+    },
+    models : [User]
+});

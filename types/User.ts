@@ -1,4 +1,4 @@
-type User = {
+type userToAdd = {
     id: string;
     nom: string;
     prenom: string;
@@ -16,6 +16,6 @@ type userToModify = {
 }
 
 export {
-    User,
+    userToAdd,
     userToModify
 }

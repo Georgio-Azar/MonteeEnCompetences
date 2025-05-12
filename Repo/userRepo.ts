@@ -1,68 +1,32 @@
-import { User, userToModify }  from '../types/User';
-import db from '../database';
+import { User } from '../models/User';
+import { userToModify } from '../types/User';
+import { CreationAttributes } from 'sequelize';
 
-async function getUsersFromDB() : Promise<User[]> {
-    return new Promise(async (resolve, reject) => {
-        let users : User[] = await db.users.findAll();
-        if (users) {
-            resolve(users);
-        } else {
-            reject(new Error('No users found'));
-        }
-    });
+export async function getUsersFromDB(): Promise<User[]> {
+    const users = await User.findAll();
+    if (!users.length) throw new Error('No users found');
+    return users;
 }
 
-async function getUserByIdFromDB(id : string) : Promise<User | null> {
-    return new Promise(async (resolve, reject) => {
-        let user : User | null = await db.users.findOne({ where: { id } });
-        if (user) {
-            resolve(user);
-        } else {
-            reject(new Error('User not found'));
-        }
-    });
+export async function getUserByIdFromDB(id: string): Promise<User | null> {
+    const user = await User.findOne({ where: { id } });
+    if (!user) throw new Error('User not found');
+    return user;
 }
 
-async function addUserToDB(user : User) : Promise<User> {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const newUser : User = await db.users.create(user);
-            resolve(newUser);
-        } catch (error) {
-            reject(error);
-        }
-    });
+export async function addUserToDB(user: CreationAttributes<User>): Promise<User> {
+    return await User.create(user);
 }
 
-async function modifyUserInDB(id : string, user : userToModify) : Promise<User | null> {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const [updated] = await db.users.update(user, { where: { id } });
-            if (updated) {
-                const updatedUser : User | null = await db.users.findOne({ where: { id } });
-                resolve(updatedUser);
-            } else {
-                resolve(null);
-            }
-        } catch (error) {
-            reject(error);
-        }
-    });
+export async function modifyUserInDB(id: string, user: userToModify): Promise<User | null> {
+    const [updated] = await User.update(user, { where: { id } });
+    if (!updated) return null;
+    return await User.findOne({ where: { id } });
 }
 
-async function deleteUserInDB(id : string) : Promise<void> {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const deleted = await db.users.destroy({ where: { id } });
-            if (deleted) {
-                resolve();
-            } else {
-                reject(new Error('User not found'));
-            }
-        } catch (error) {
-            reject(error);
-        }
-    });
+export async function deleteUserInDB(id: string): Promise<void> {
+    const deleted = await User.destroy({ where: { id } });
+    if (!deleted) throw new Error('User not found');
 }
 
 export default {
@@ -70,5 +34,5 @@ export default {
     getUserByIdFromDB,
     addUserToDB,
     modifyUserInDB,
-    deleteUserInDB
+    deleteUserInDB,
 }

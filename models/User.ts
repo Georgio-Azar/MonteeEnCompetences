@@ -1,38 +1,51 @@
-import { Sequelize, DataTypes } from "sequelize";
-import { User } from "../types/User";
+import {
+  Table,
+  Column,
+  Model,
+  PrimaryKey,
+  DataType,
+  IsEmail,
+  Unique,
+  AllowNull,
+} from 'sequelize-typescript';
 
-export default (sequelize: Sequelize) => {
-    const user = sequelize.define<any, User>(
-        "user",
-        {
-            id : {
-                type: DataTypes.STRING,
-                primaryKey: true,
-                allowNull: false,
-            },
-            nom: {
-                type: DataTypes.STRING,
-                allowNull: false,
-            },
-            prenom: {
-                type: DataTypes.STRING,
-                allowNull: false,
-            },
-            age: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-            },
-            email: {
-                type: DataTypes.STRING,
-                allowNull: false,
-                unique: true,
-            },
-            password: {
-                type: DataTypes.STRING,
-                allowNull: false,
-            },
-        },
-        { timestamps: true }
-    );
-    return user;
+interface UserAttributes {
+  id: string;
+  nom: string;
+  prenom: string;
+  age: number;
+  email: string;
+  password: string;
+}
+
+@Table({
+  tableName: 'users',
+  timestamps: true,
+})
+export class User extends Model<UserAttributes> {
+  @PrimaryKey
+  @Column(DataType.STRING)
+  declare id: string;
+
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  nom!: string;
+
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  prenom!: string;
+
+  @AllowNull(false)
+  @Column(DataType.INTEGER)
+  age!: number;
+
+  @AllowNull(false)
+  @Unique
+  @IsEmail
+  @Column(DataType.STRING)
+  declare email : string;
+
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  password!: string;
 }

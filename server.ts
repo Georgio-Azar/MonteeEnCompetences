@@ -2,14 +2,17 @@ import express from 'express';
 
 import index from './routes/index';
 import users from './routes/users';
+import auth from './routes/auth';
 
 import { sequelize } from './database';
 
 const app = express();
+app.use(express.json());
 const PORT = 3000;
 
 app.use("/", index);
 app.use("/users", users);
+app.use("/auth", auth);
 
 async function startServer() {
     try {

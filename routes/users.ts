@@ -8,9 +8,9 @@ router.get('/', usersController.getUsers);
 
 router.get('/:id', usersController.getUsersById);
 
-router.post('/', express.json(), usersController.addUser);
+router.post('/', usersController.addUser);
 
-router.put('/:id', express.json(), usersController.modifyUser);
+router.put('/:id', usersController.modifyUser);
 
 router.delete('/:id', usersController.deleteUser);
 

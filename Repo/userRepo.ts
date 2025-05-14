@@ -29,10 +29,17 @@ export async function deleteUserInDB(id: string): Promise<void> {
     if (!deleted) throw new Error('User not found');
 }
 
+export async function getUserByEmailFromDB(email: string): Promise<User | null> {
+    const user = await User.findOne({ where: { email } });
+    if (!user) throw new Error('User not found');
+    return user;
+}
+
 export default {
     getUsersFromDB,
     getUserByIdFromDB,
     addUserToDB,
     modifyUserInDB,
     deleteUserInDB,
+    getUserByEmailFromDB
 }

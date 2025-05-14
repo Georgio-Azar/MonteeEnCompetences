@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 import { User } from '../models/User';
 import { getUserByEmailFromDB } from '../Repo/userRepo';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 const ACCESS_SECRET = 'access-secret';
 const REFRESH_SECRET = 'refresh-secret';

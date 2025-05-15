@@ -19,19 +19,19 @@ export default function RegisterForm() {
     return (
         <div id="register-form">
             <h1>Register</h1>    
-        <form onSubmit={handleSubmit(onSubmit)}>
-            <label htmlFor="firstname">First name : </label>
-            <input {...register("firstName")} placeholder="First Name" id="firstname" /><br />
-            <label htmlFor="lastname">Last name : </label>
-            <input {...register("lastName")} placeholder="Last Name" id="lastname"/><br />
-            <label htmlFor="email">Email : </label>
-            <input {...register("email")} placeholder="Email" id="email" /><br />
-            <label htmlFor="age">Age : </label>
-            <input {...register("age")} placeholder="Age" type="number" id="age" /><br />
-            <label htmlFor="password">Password : </label>
-            <input {...register("password")} placeholder="Password" type="password" id="password" /><br />
-            <button type="submit">Register</button>
-        </form>
+            <form onSubmit={handleSubmit(onSubmit)}>
+                <label htmlFor="firstname">First name : </label>
+                <input {...register("firstName")} placeholder="John" id="firstname" /><br />
+                <label htmlFor="lastname">Last name : </label>
+                <input {...register("lastName")} placeholder="Doe" id="lastname"/><br />
+                <label htmlFor="email">Email : </label>
+                <input {...register("email")} placeholder="John.Doe@gmail.com" id="register-email" /><br />
+                <label htmlFor="age">Age : </label>
+                <input {...register("age")} placeholder="55" type="number" id="age" /><br />
+                <label htmlFor="password">Password : </label>
+                <input {...register("password")} placeholder="Password" type="password" id="register-password" /><br />
+                <button type="submit">Register</button>
+            </form>
         </div>
     )
 }

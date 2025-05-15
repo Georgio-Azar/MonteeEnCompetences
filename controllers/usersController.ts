@@ -1,18 +1,15 @@
 import {Request, Response} from 'express';
-import fs from 'fs';
 import crypto from 'crypto';
 
 import usersModel from '../models/usersModel';
 import { addUserSchema, modifyUserSchema } from '../schemas/usersSchemas';
 import logger from '../logs/logger';
-import { userToAdd, userToModify }  from '../types/User';
 import { User } from '../models/User';
 import userRepo from '../Repo/userRepo';
 import { CreationAttributes } from 'sequelize';
 
 
 async function getUsers (req : Request, res : Response) {
-    logger.http(`${req.method} /users - ${req.ip}`);
     try {
         const usersFromDB = await userRepo.getUsersFromDB();
         if (usersFromDB.length > 0) {
@@ -28,14 +25,11 @@ async function getUsers (req : Request, res : Response) {
         }
     }
     catch (err) {
-        logger.error(err);
-        console.error(err);
         res.status(500).send('Error reading file');
     }
 }
 
 async function getUsersById (req : Request, res : Response) {
-    logger.http(`${req.method} /users${req.url} - ${req.ip}`);
     const id = req.params.id;
     try {
         const userFromDB = await userRepo.getUserByIdFromDB(id);
@@ -47,14 +41,11 @@ async function getUsersById (req : Request, res : Response) {
         }
     }
     catch (err) {
-        logger.error(err);
-        console.error(err);
         res.status(500).send('Error reading file');
     }
 }
 
 async function addUser (req : Request, res : Response) {
-    logger.http(`${req.method} /users - ${req.ip}`);
     const newUser = req.body;
     const parsedUser = addUserSchema.safeParse(newUser);
     if (!parsedUser.success) {
@@ -83,14 +74,11 @@ async function addUser (req : Request, res : Response) {
         res.status(201).send('User added successfully');
     }
     catch (err) {
-        logger.error(err);
-        console.error(err);
         res.status(500).send('Error while adding user');
     }
 }
 
 async function modifyUser (req : Request, res : Response) {
-    logger.http(`${req.method} /users${req.url} - ${req.ip}`);
     const id = req.params.id;
     const updatedUser = req.body;
     const parsedUser = modifyUserSchema.safeParse(updatedUser);
@@ -117,14 +105,11 @@ async function modifyUser (req : Request, res : Response) {
         }
     }
     catch (err) {
-        console.error(err);
-        logger.error(err);
         res.status(500).send('Error writing file');
     }
 }
 
 async function deleteUser (req : Request, res : Response) {
-    logger.http(`${req.method} /users${req.url} - ${req.ip}`);
     const id = req.params.id;
     try {
         let promiseDelete = await userRepo.deleteUserInDB(id);
@@ -136,8 +121,6 @@ async function deleteUser (req : Request, res : Response) {
         }
     }
     catch (err) {
-        console.error(err);
-        logger.error(err);
         res.status(500).send('Error writing file');
     }
 }

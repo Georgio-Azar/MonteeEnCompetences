@@ -3,12 +3,15 @@ import express from 'express';
 import index from './routes/index';
 import users from './routes/users';
 import auth from './routes/auth';
+import loggerMiddleware from './middleware/loggerMiddleware';
 
 import { sequelize } from './database';
 
 const app = express();
 app.use(express.json());
 const PORT = 3000;
+
+app.use(loggerMiddleware);
 
 app.use("/", index);
 app.use("/users", users);

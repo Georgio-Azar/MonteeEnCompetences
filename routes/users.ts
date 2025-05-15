@@ -1,17 +1,18 @@
 import express from 'express';
 
 import usersController from '../controllers/usersController';
+import { use } from 'passport';
 
 const router = express.Router();
 
-router.get('/', usersController.getUsers);
+router.get('/', usersController.getUsersAsync);
 
-router.get('/:id', usersController.getUsersById);
+router.get('/:id', usersController.getUsersByIdAsync);
 
-router.post('/', usersController.addUser);
+router.post('/', usersController.addUserAsync);
 
-router.put('/:id', usersController.modifyUser);
+router.put('/:id', usersController.modifyUserAsync);
 
-router.delete('/:id', usersController.deleteUser);
+router.delete('/:id', usersController.deleteUserAsync);
 
 export default router;

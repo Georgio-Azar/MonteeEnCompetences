@@ -7,10 +7,6 @@ export const loggerMiddleware = (req: Request, res: Response, next: NextFunction
         if (req.method !== "GET") {
         }
     });
-    res.on("error", (err) => {
-        logger.error(`Error: ${err}`);
-        console.log(`Error: ${err}`);
-    });
     
     next();
 }

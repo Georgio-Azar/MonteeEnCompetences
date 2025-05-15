@@ -4,6 +4,7 @@ import index from './routes/index';
 import users from './routes/users';
 import auth from './routes/auth';
 import loggerMiddleware from './middleware/loggerMiddleware';
+import errorMiddleware from './middleware/erreurMiddleware';
 
 import { sequelize } from './database';
 
@@ -16,6 +17,8 @@ app.use(loggerMiddleware);
 app.use("/", index);
 app.use("/users", users);
 app.use("/auth", auth);
+
+app.use(errorMiddleware);
 
 async function startServer() {
     try {

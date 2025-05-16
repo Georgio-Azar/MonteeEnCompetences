@@ -9,17 +9,16 @@ import userRepo from '../Repo/userRepo';
 import { CreationAttributes } from 'sequelize';
 import { HttpError } from '../classes/httpError';
 import catchAsyncErrors from '../utils/errorUtils';
+import UserDTO from '../dto/userDTO';
 
 
 async function getUsers (req : Request, res : Response) {
     const usersFromDB = await userRepo.getUsersFromDB();
     if (usersFromDB.length > 0) {
-        let result = "";
-        usersFromDB.forEach((user : User) => {
-            result += (`Nom: ${user.nom}, Prenom: ${user.prenom}, Age: ${user.age}, Mail : ${user.email}, ID: ${user.id}`);
-            result += "<br>";
+        let usersDTO = usersFromDB.map((user : User) => {
+            return new UserDTO(user.id, user.nom, user.prenom, user.age, user.email);
         });
-        res.send(result);
+        res.send(usersDTO);
     }
     else {
         throw new HttpError('No users found', 404);
@@ -32,7 +31,8 @@ async function getUsersById (req : Request, res : Response) {
     const id = req.params.id;
     const userFromDB = await userRepo.getUserByIdFromDB(id);
     if (userFromDB !== null) {
-        res.send(`Nom: ${userFromDB.nom}, Prenom: ${userFromDB.prenom}, Age: ${userFromDB.age}, Mail : ${userFromDB.email}`);
+        let userDTO = new UserDTO(userFromDB.id, userFromDB.nom, userFromDB.prenom, userFromDB.age, userFromDB.email);
+        res.send(userDTO);
     }
     else {
         throw new HttpError('User not found', 404);
@@ -47,14 +47,14 @@ async function addUser (req : Request, res : Response) {
         throw new HttpError(parsedUser.error.message, 400);
     }
     const validatedUser = parsedUser.data;
-    validatedUser.id = crypto.randomUUID();
+    let cryptoId = crypto.randomUUID();
     let passwordError = usersModel.checkPassword(validatedUser.password);
     if (passwordError !== "") {
         throw new HttpError(passwordError, 400);
     } 
     validatedUser.password = await usersModel.hashPassword(validatedUser.password);
     let userInputToAdd : CreationAttributes<User> = {
-        id: validatedUser.id,
+        id: cryptoId,
         nom: validatedUser.nom,
         prenom: validatedUser.prenom,
         age: validatedUser.age,
@@ -99,7 +99,6 @@ async function deleteUser (req : Request, res : Response) {
         logger.info(`User with id ${id} deleted successfully`);
         res.send('User deleted successfully');
     } else {
-        res.status(404).send('User not found');
         throw new HttpError('User not found', 404);
     }
 }

@@ -28,6 +28,11 @@ export async function login (req : Request, res : Response) {
         secure: true,
         sameSite: 'strict',
     });
+    res.cookie('accessToken', accesToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+    });
 
     console.log('Access token:', accesToken);
     console.log('Refresh token:', refreshToken);

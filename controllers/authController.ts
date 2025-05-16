@@ -1,8 +1,4 @@
-import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
-import { getUserByEmailFromDB } from '../Repo/userRepo';
-import bcrypt from 'bcryptjs';
-import { HttpError } from '../classes/httpError';
 import catchAsyncErrors from '../utils/errorUtils';
 import authService from '../service/authService';
 

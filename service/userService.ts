@@ -2,7 +2,7 @@ import userRepo from "../Repo/userRepo";
 import UserDTO from "../dto/userDTO";
 import { HttpError } from "../classes/httpError";
 import { addUserSchema, modifyUserSchema } from "../schemas/usersSchemas";
-import usersModel from "../utils/usersUtils";
+import usersUtil from "../utils/usersUtils";
 import crypto from "crypto";
 import { CreationAttributes } from "sequelize";
 import { User } from "../models/User";
@@ -38,18 +38,18 @@ async function addUserService(userInput: any) {
     }
     const validatedUser = parsedUser.data;
     let cryptoId = crypto.randomUUID();
-    let passwordError = usersModel.checkPassword(validatedUser.password);
+    let passwordError = usersUtil.checkPassword(validatedUser.password);
     if (passwordError !== "") {
         throw new HttpError(passwordError, 400);
     }
-    validatedUser.password = await usersModel.hashPassword(validatedUser.password);
+    let hashedPassword = await usersUtil.hashPassword(validatedUser.password);
     let userInputToAdd: CreationAttributes<User> = {
         id: cryptoId,
         nom: validatedUser.nom,
         prenom: validatedUser.prenom,
         age: validatedUser.age,
         email: validatedUser.email,
-        password: validatedUser.password
+        password: hashedPassword
     };
     let createdUser = await userRepo.addUserToDB(userInputToAdd);
     if (createdUser) {
@@ -67,11 +67,11 @@ async function modifyUserService(id: string, userInput: any) {
     }
     const validatedUser = parsedUser.data;
     if (validatedUser.password !== undefined) {
-        let passwordError = usersModel.checkPassword(validatedUser.password);
+        let passwordError = usersUtil.checkPassword(validatedUser.password);
         if (passwordError !== "") {
             throw new HttpError(passwordError, 400);
         } 
-        validatedUser.password = await usersModel.hashPassword(validatedUser.password);
+        validatedUser.password = await usersUtil.hashPassword(validatedUser.password);
     }
     let updatedUser = await userRepo.modifyUserInDB(id, validatedUser);
     if (updatedUser !== null) {

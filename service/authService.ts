@@ -16,8 +16,8 @@ async function loginService (userData : any) {
         throw new HttpError('Invalid password', 401);
     }
     
-    const accesToken = jwt.sign({ email: userData.email}, ACCESS_SECRET, { expiresIn: '45m' });
-    const refreshToken = jwt.sign({ email: userData.email}, REFRESH_SECRET, { expiresIn: '2d' });
+    const accesToken = jwt.sign({ id: userFromDB.id}, ACCESS_SECRET, { expiresIn: '45m' });
+    const refreshToken = jwt.sign({ id: userFromDB.id}, REFRESH_SECRET, { expiresIn: '2d' });
 
     return { accesToken, refreshToken };
 }   

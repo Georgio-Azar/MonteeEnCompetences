@@ -1,6 +1,7 @@
 import express from 'express';
 
 import usersController from '../controllers/usersController';
+import { authenticateToken } from '../middleware/authentificationMiddleware';
 import { use } from 'passport';
 
 const router = express.Router();

@@ -12,16 +12,14 @@ export async function login (req : Request, res : Response) {
         secure: true,
         sameSite: 'strict',
     });
-    res.cookie('accessToken', accesToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-    });
 
     console.log('Access token:', accesToken);
     console.log('Refresh token:', refreshToken);
     console.log('User:', user);
-    res.status(200).send('User authenticated successfully');
+    res.status(200).send({
+        message: 'User authenticated successfully',
+        accesToken: accesToken,
+    });
     console.log('User authenticated successfully');
 }
 const loginAsync = catchAsyncErrors(login);

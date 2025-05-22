@@ -10,12 +10,12 @@ const router = express.Router();
 
 router.get('/', usersController.getUsersAsync);
 
-router.get('/:id', usersController.getUsersByIdAsync);
+router.get('/:id', authenticateToken, usersController.getUsersByIdAsync);
 
 router.post('/', createLimite, usersController.addUserAsync);
 
-router.put('/:id', usersController.modifyUserAsync);
+router.put('/:id', authenticateToken, usersController.modifyUserAsync);
 
-router.delete('/:id',deleteLimite, usersController.deleteUserAsync);
+router.delete('/:id', authenticateToken, deleteLimite, usersController.deleteUserAsync);
 
 export default router;

@@ -13,6 +13,8 @@ async function getUsers (req : Request, res : Response) {
 const getUsersAsync = catchAsyncErrors(getUsers);
 
 async function getUsersById (req : Request, res : Response) {
+    const userId = (req as any).user?.id;
+    console.log(userId);
     const id = req.params.id;
     const userDTO = await userService.getUsersByIdService(id);
     res.send(userDTO);

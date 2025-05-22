@@ -96,6 +96,7 @@ describe('userService', () => {
         //expect(usersUtil.hashPassword).toHaveBeenCalledWith(mockUserInput.password);
         expect(userRepo.addUserToDB).toHaveBeenCalledWith({
             id: expect.any(String),
+            credit: 20,
             nom: mockUserInput.nom,
             prenom: mockUserInput.prenom,
             age: mockUserInput.age,
@@ -126,6 +127,7 @@ describe('userService', () => {
         //expect(usersUtil.hashPassword).toHaveBeenCalledWith(mockUserInput.password);
         expect(userRepo.addUserToDB).toHaveBeenCalledWith({
             id: expect.any(String),
+            credit: 20,
             nom: mockUserInput.nom,
             prenom: mockUserInput.prenom,
             age: mockUserInput.age,

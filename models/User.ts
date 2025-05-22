@@ -7,7 +7,9 @@ import {
   IsEmail,
   Unique,
   AllowNull,
+  Default,
 } from 'sequelize-typescript';
+import { de } from 'zod/v4/locales';
 
 interface UserAttributes {
   id: string;
@@ -16,6 +18,7 @@ interface UserAttributes {
   age: number;
   email: string;
   password: string;
+  credit: number;
 }
 
 @Table({
@@ -48,4 +51,9 @@ export class User extends Model<UserAttributes> {
   @AllowNull(false)
   @Column(DataType.STRING)
   password!: string;
+
+  @AllowNull(false)
+  @Column(DataType.INTEGER)
+  credit!: number;
+
 }

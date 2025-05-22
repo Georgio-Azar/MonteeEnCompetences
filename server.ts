@@ -28,7 +28,7 @@ app.use(errorMiddleware);
 
 async function startServer() {
     try {
-        await sequelize.sync();
+        await sequelize.sync({alter: true});
         console.log('Connection has been established successfully.');
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);

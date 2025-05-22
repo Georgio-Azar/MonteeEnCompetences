@@ -21,6 +21,7 @@ beforeAll(async () => {
             age: 30,
             email: 'jean.dupont@example.com',
             password: 'SecureP@ssword123',
+            credit: 20,
         }
     ]);
 })
@@ -50,6 +51,7 @@ describe("userRepo", () => {
             age: 30,
             email: 'jean.dupont@example.com',
             password: 'SecureP@ssword123',
+            credit: 20,
         }
     ]);
         const user = await userRepo.getUserByIdFromDB('1');
@@ -69,6 +71,7 @@ describe("userRepo", () => {
             age: 35,
             email: 'Marie.Curie@gmail.com',
             password: 'Mcp@ssw0rd123',
+            credit: 20,
         }
         const user = await userRepo.addUserToDB(newUser);
         expect(user).toBeDefined();

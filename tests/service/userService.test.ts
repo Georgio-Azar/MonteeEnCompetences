@@ -33,7 +33,7 @@ describe('userService', () => {
 
         const result = await userService.getUsersService();
         expect(result).toEqual(mockUsers.map((user) => {
-            return new UserDTO(user.id, user.nom, user.prenom, user.age, user.email);
+            return new UserDTO(user.id, user.nom, user.prenom, user.age, user.email, user.credit);
         }));
     });
 
@@ -52,7 +52,7 @@ describe('userService', () => {
 
         jest.spyOn(userRepo, 'getUserByIdFromDB').mockResolvedValue(mockUser);
         const result = await userService.getUsersByIdService(mockUser.id);
-        expect(result).toEqual(new UserDTO(mockUser.id, mockUser.nom, mockUser.prenom, mockUser.age, mockUser.email));
+        expect(result).toEqual(new UserDTO(mockUser.id, mockUser.nom, mockUser.prenom, mockUser.age, mockUser.email, mockUser.credit));
     });
 
     it('should throw HttpError if user not found', async () => {
@@ -90,7 +90,7 @@ describe('userService', () => {
 
         const result = await userService.addUserService(mockUserInput);
 
-        expect(result).toEqual(new UserDTO(mockUser.id, mockUser.nom, mockUser.prenom, mockUser.age, mockUser.email));
+        expect(result).toEqual(new UserDTO(mockUser.id, mockUser.nom, mockUser.prenom, mockUser.age, mockUser.email, mockUser.credit));
         expect(addUserSchema.safeParse).toHaveBeenCalledWith(mockUserInput);
         expect(usersUtil.checkPassword).toHaveBeenCalledWith(mockUserInput.password);
         //expect(usersUtil.hashPassword).toHaveBeenCalledWith(mockUserInput.password);
@@ -201,7 +201,7 @@ describe('userService', () => {
         jest.spyOn(userRepo, 'modifyUserInDB').mockResolvedValue(mockUpdatedUser);
         jest.spyOn(usersUtils, 'checkPassword').mockReturnValue("");
         const result = await userService.modifyUserService(mockId, mockUserInput);
-        expect(result).toEqual(new UserDTO(mockUpdatedUser.id, mockUpdatedUser.nom, mockUpdatedUser.prenom, mockUpdatedUser.age, mockUpdatedUser.email));
+        expect(result).toEqual(new UserDTO(mockUpdatedUser.id, mockUpdatedUser.nom, mockUpdatedUser.prenom, mockUpdatedUser.age, mockUpdatedUser.email, mockUpdatedUser.credit));
         expect(userRepo.modifyUserInDB).toHaveBeenCalledWith(mockId, expectedHashedPassword);
         expect(userRepo.modifyUserInDB).toHaveBeenCalledTimes(1);
     });

@@ -11,7 +11,7 @@ async function getUsersService() {
     const usersFromDB = await userRepo.getUsersFromDB();
     if (usersFromDB.length > 0) {
         let usersDTO = usersFromDB.map((user) => {
-            return new UserDTO(user.id, user.nom, user.prenom, user.age, user.email);
+            return new UserDTO(user.id, user.nom, user.prenom, user.age, user.email, user.credit);
         });
         return usersDTO;
     }
@@ -23,7 +23,7 @@ async function getUsersService() {
 async function getUsersByIdService(id: string) {
     const userFromDB = await userRepo.getUserByIdFromDB(id);
     if (userFromDB !== null) {
-        let userDTO = new UserDTO(userFromDB.id, userFromDB.nom, userFromDB.prenom, userFromDB.age, userFromDB.email);
+        let userDTO = new UserDTO(userFromDB.id, userFromDB.nom, userFromDB.prenom, userFromDB.age, userFromDB.email, userFromDB.credit);
         return userDTO;
     }
     else {
@@ -49,11 +49,12 @@ async function addUserService(userInput: any) {
         prenom: validatedUser.prenom,
         age: validatedUser.age,
         email: validatedUser.email,
-        password: hashedPassword
+        password: hashedPassword,
+        credit: 20
     };
     let createdUser = await userRepo.addUserToDB(userInputToAdd);
     if (createdUser) {
-        return new UserDTO(createdUser.id, createdUser.nom, createdUser.prenom, createdUser.age, createdUser.email);
+        return new UserDTO(createdUser.id, createdUser.nom, createdUser.prenom, createdUser.age, createdUser.email, createdUser.credit);
     }
     else {
         throw new HttpError('User not created', 500);
@@ -75,7 +76,7 @@ async function modifyUserService(id: string, userInput: any) {
     }
     let updatedUser = await userRepo.modifyUserInDB(id, validatedUser);
     if (updatedUser !== null) {
-        return new UserDTO(updatedUser.id, updatedUser.nom, updatedUser.prenom, updatedUser.age, updatedUser.email);
+        return new UserDTO(updatedUser.id, updatedUser.nom, updatedUser.prenom, updatedUser.age, updatedUser.email, updatedUser.credit);
     } else {
         throw new HttpError('User not found', 404);
     }

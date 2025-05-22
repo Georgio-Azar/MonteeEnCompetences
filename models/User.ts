@@ -9,7 +9,6 @@ import {
   AllowNull,
   Default,
 } from 'sequelize-typescript';
-import { de } from 'zod/v4/locales';
 
 interface UserAttributes {
   id: string;

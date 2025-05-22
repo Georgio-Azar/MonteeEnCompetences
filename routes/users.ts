@@ -8,12 +8,12 @@ const router = express.Router();
 
 router.get('/', usersController.getUsersAsync);
 
-router.get('/:id', usersController.getUsersByIdAsync);
+router.get('/:id', authenticateToken, usersController.getUsersByIdAsync);
 
 router.post('/', usersController.addUserAsync);
 
-router.put('/:id', usersController.modifyUserAsync);
+router.put('/:id', authenticateToken, usersController.modifyUserAsync);
 
-router.delete('/:id', usersController.deleteUserAsync);
+router.delete('/:id', authenticateToken, usersController.deleteUserAsync);
 
 export default router;

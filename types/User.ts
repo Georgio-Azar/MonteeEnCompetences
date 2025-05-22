@@ -15,7 +15,7 @@ type userToModify = {
     password?: string;
 }
 
-export {
+export type {
     userToAdd,
     userToModify
 }

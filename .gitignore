@@ -1,6 +1,5 @@
-node_modules/*
-dist/*
+node_modules
+coverage
+dist
 logs/*.log
-package-lock.json
 .env
-coverage/*

@@ -2,20 +2,19 @@ import express from 'express';
 
 import usersController from '../controllers/usersController';
 import { authenticateToken } from '../middleware/authentificationMiddleware';
-import { use } from 'passport';
-import { createLimite, deleteLimite } from '../middleware/ratelimite_ip';
-import { rateLimiter } from '../middleware/ratelimite';
+import { rateLimiteMiddlewareByIP } from '../middleware/rateLimiteMiddlewareByIP';
+import { rateLimiter } from '../middleware/rateLimiteMiddleware';
 
 const router = express.Router();
 
 router.get('/', usersController.getUsersAsync);
 
-router.get('/:id', authenticateToken, usersController.getUsersByIdAsync);
+router.get('/:id', authenticateToken, rateLimiter, usersController.getUsersByIdAsync);
 
-router.post('/', createLimite, usersController.addUserAsync);
+router.post('/', rateLimiteMiddlewareByIP, usersController.addUserAsync);
 
-router.put('/:id', authenticateToken, usersController.modifyUserAsync);
+router.put('/:id', authenticateToken, rateLimiter, usersController.modifyUserAsync);
 
-router.delete('/:id', authenticateToken, deleteLimite, usersController.deleteUserAsync);
+router.delete('/:id', authenticateToken, rateLimiteMiddlewareByIP, usersController.deleteUserAsync);
 
 export default router;

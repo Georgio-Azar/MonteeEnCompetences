@@ -5,28 +5,32 @@
     "prenom": "Jean",
     "email": "Jean.Dupont@gmail.com",
     "age": 10,
-    "password": "$2b$10$9R5sE.slVsoxdxOVafjsh.rcyV1qYZmyMWcYXuCvAt6YS12rWNThq"
+    "password": "$2b$10$9R5sE.slVsoxdxOVafjsh.rcyV1qYZmyMWcYXuCvAt6YS12rWNThq",
+    "credit": 20
   },
   {
     "id": 2,
     "nom": "Martin",
     "prenom": "Marie",
     "email": "Marie.Martin@gmail.com",
-    "age": 30
+    "age": 30,
+    "credit": 20
   },
   {
     "id": 3,
     "nom": "Durand",
     "prenom": "Pierre",
     "email": "Pierre.Durand@gmail.com",
-    "age": 28
+    "age": 28,
+    "credit": 20
   },
   {
     "nom": "Andre",
     "prenom": "Eric",
     "email": "Eric.Andre@mail.com",
     "age": 55,
-    "id": "b88b6429-6c0d-4de9-8587-a56cbfea2a0b"
+    "id": "b88b6429-6c0d-4de9-8587-a56cbfea2a0b",
+    "credit": 20
   },
   {
     "nom": "Azar",
@@ -34,7 +38,8 @@
     "email": "Georgio.Azar@gmail.com",
     "age": 21,
     "password": "$2b$10$yScj8ppaqM3isqBo20aDlOS9TH.Blqq2o5x0y4gEUy6sTmF/lGllW",
-    "id": "130a0a21-8a4e-4725-9414-52f542f7eecb"
+    "id": "130a0a21-8a4e-4725-9414-52f542f7eecb",
+    "credit": 20
   },
   {
     "id": "116a4581-ffa9-4c03-85dd-0758cb21043a",
@@ -42,7 +47,8 @@
     "prenom": "Jean",
     "age": 10,
     "email": "Jean.Dupnt@gmail.com",
-    "password": "$2b$10$hBIaWRWDg7.HGZlGh0nQW.3nBiOdoHdbKjZ9Bk1vJSUS4tb5Q5kKm"
+    "password": "$2b$10$hBIaWRWDg7.HGZlGh0nQW.3nBiOdoHdbKjZ9Bk1vJSUS4tb5Q5kKm",
+    "credit": 20
   },
   {
     "id": "6745db9a-58c8-41b1-bc11-12b5c8203b63",
@@ -50,6 +56,7 @@
     "prenom": "Tom",
     "age": 25,
     "email": "OliveetTom@mail.com",
-    "password": "$2b$10$2q3jlQ8gDYg0iXlDsmdMJOijhGNkaIGN2Dc1dOZyLy/o9VTnv0MZy"
+    "password": "$2b$10$2q3jlQ8gDYg0iXlDsmdMJOijhGNkaIGN2Dc1dOZyLy/o9VTnv0MZy",
+    "credit": 20
   }
 ]

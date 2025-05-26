@@ -1,27 +1,25 @@
 import { Request, Response, NextFunction } from "express";
-import jwt, { JwtPayload, VerifyErrors} from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 const ACCESS_SECRET = "access-secret";
 
-export interface AuthenticatedRequest extends Request {
-    user?: { id: string } & JwtPayload;
-}
-
-export function authenticateToken(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export function authenticateToken(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers["authorization"];
     const token = authHeader?.startsWith('Bearer ')
             ? authHeader.slice(7)
             : req.cookies?.accessToken;
     
     if (!token) {
-        return res.status(401).json({ message: 'Token manquant' });
+        res.status(401).json({ message: 'Token manquant' });
+        return;
     }
 
-    jwt.verify(token, ACCESS_SECRET, (err : VerifyErrors | null, decoded : JwtPayload | string | undefined) => {
-        if (err) {
-            return res.status(403).json({ message: 'Token invalide' });
+    jwt.verify(token, ACCESS_SECRET, (err : jwt.VerifyErrors | null, decoded : jwt.JwtPayload | string | undefined) => {
+        if (err || typeof decoded !== 'object' || !("id" in decoded)) {
+            res.status(403).json({ message: 'Token invalide' });
+            return;
         }
-        req.user = decoded as { id: string};
+        (req as any).user = decoded as { id: string} & jwt.JwtPayload;
         next();
     });
 }

@@ -1,9 +1,9 @@
 import express from 'express';
 import authController from '../controllers/authController';
-import { rateLimiter } from '../middleware/ratelimite';
+import { loginRateLimiter } from '../middleware/rateLimiteMiddleware';
 
 const router = express.Router();
 
-router.post('/login', rateLimiter, authController.loginAsync);
+router.post('/login',loginRateLimiter, authController.loginAsync);
 
 export default router;

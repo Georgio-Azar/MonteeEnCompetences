@@ -1,188 +1,233 @@
-import request from "supertest";
-import express, { Request, Response } from "express";
-import userRepo from "../../Repo/userRepo";
-import userRoutes from "../../routes/users";
-import authRoutes from "../../routes/auth";
-import bodyParser from "body-parser";
-import jwt from "jsonwebtoken";
-import authController from "../../controllers/authController";
+import {
+  rateLimitMiddleware,
+  rateLimiter,
+  loginRateLimiter
+} from "../../middleware/rateLimiteMiddleware"; // adapte le chemin si besoin
 
-jest.mock("bcryptjs");
+import { getUserByIdFromDB, getUserByEmailFromDB, modifyUserInDB } from '../../Repo/userRepo';
+import { HttpError } from "../../classes/httpError";
 
-jest.mock("../../Repo/userRepo");
-jest.mock("../../controllers/authController", () => ({
-  __esModule: true,
-  default: {
-    loginAsync: jest.fn(),
-  },
-}));
+jest.mock('../../Repo/userRepo');
 
-jest.mock("../../controllers/usersController", () => ({
-  getUsersAsync: jest.fn((req, res) => res.send("Liste users")),
-  getUsersByIdAsync: jest.fn((req, res) => res.send("User par ID")),
-  addUserAsync: jest.fn((req, res) => res.send("Ajouté")),
-  modifyUserAsync: jest.fn((req, res) => res.send("Modifié")),
-  deleteUserAsync: jest.fn((req, res) => res.send("Supprimé")),
-}));
+const mockUser = {
+  id: 'user-123',
+  credit: 10,
+  creditLastUpdated: new Date(Date.now() - 2 * 60 * 1000).toISOString() // 2 minutes ago
+};
 
-const mockUser = { id: "user123", email: "test@example.com" };
-
-describe("LOGIN : Test la rate limiter de login", () => {
-  const app = express();
-  app.use(bodyParser.json());
-  app.use(authRoutes);
-
+describe('rateLimitMiddleware', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (userRepo.getUserByEmailFromDB as jest.Mock).mockResolvedValue(mockUser);
-    (authController.loginAsync as jest.Mock).mockImplementation(
-      (req: Request, res: Response) => {
-        res.status(200).send("Login réussi");
-      }
-    );
+    (getUserByIdFromDB as jest.Mock).mockResolvedValue({ ...mockUser });
+    (modifyUserInDB as jest.Mock).mockResolvedValue(null);
   });
 
-  it("POST /login - accepte la connexion avec email valide et consommer 5 token", async () => {
-    const res = await request(app)
-      .post("/login")
-      .send({ email: mockUser.email });
+  it('should refill tokens and update user in DB', async () => {
+    const result = await rateLimitMiddleware(mockUser.id);
 
-    expect(res.status).toBe(200);
-    expect(res.text).toBe("Login réussi");
-    expect(res.headers["x-ratelimit-remaining"]).toEqual("15");
+    expect(getUserByIdFromDB).toHaveBeenCalledWith(mockUser.id);
+    expect(modifyUserInDB).toHaveBeenCalled();
+    expect(result.tokens).toBeLessThanOrEqual(20);
+    expect(result.lastRefill).toBeLessThanOrEqual(Date.now());
   });
 
-  it("POST /login - refuse après 5 tentatives (trop de requêtes)", async () => {
-    for (let i = 0; i < 4; i++) {
-      await request(app).post("/login").send({ email: mockUser.email });
-    }
-    const res = await request(app)
-      .post("/login")
-      .send({ email: mockUser.email });
-    expect(res.status).toBe(429);
-  });
+  it('should throw error if user not found', async () => {
+    (getUserByIdFromDB as jest.Mock).mockResolvedValue(null);
 
-  it("POST /login - erreur 400 si email manquant", async () => {
-    const res = await request(app).post("/login").send({});
-    expect(res.status).toBe(400);
-    expect(res.text).toMatch(/Email requis/);
-  });
-
-  it("POST /login - erreur 401 si utilisateur non trouvé", async () => {
-    (userRepo.getUserByEmailFromDB as jest.Mock).mockResolvedValue(null);
-    const res = await request(app)
-      .post("/login")
-      .send({ email: "notfound@example.com" });
-
-    expect(res.status).toBe(401);
-    expect(res.text).toMatch(/User not found/);
+    await expect(rateLimitMiddleware('invalid-id')).rejects.toThrow(HttpError);
   });
 });
 
-const mockUserPut = { id: "userput", email: "testput@ikattan.com" };
-
-describe("Test rateLimite PUT /:id", () => {
-  const app = express();
-  app.use(bodyParser.json());
-
-  app.use("/", userRoutes);
+describe('rateLimiter middleware', () => {
+  const mockReq: any = {
+    params: { id: mockUser.id },
+    method: 'GET',
+    path: '/',
+    headers: {},
+    setHeader: jest.fn()
+  };
+  const mockRes: any = {
+    setHeader: jest.fn()
+  };
+  const mockNext = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (userRepo.getUserByIdFromDB as jest.Mock).mockResolvedValue(mockUserPut);
+    (getUserByIdFromDB as jest.Mock).mockResolvedValue({ ...mockUser });
+    (modifyUserInDB as jest.Mock).mockResolvedValue(null);
   });
 
-  const tokenPut = jwt.sign({ id: "userput" }, "access-secret", {
-    expiresIn: "1h",
+  it('should call next if user has enough credits', async () => {
+    await rateLimiter(mockReq, mockRes, mockNext);
+
+    expect(mockRes.setHeader).toHaveBeenCalledWith("X-RateLimit-Remaining", expect.any(Number));
+    expect(mockNext).toHaveBeenCalledWith();
   });
 
-  it("PUT autorisé avec token JWT valide", async () => {
-    const res = await request(app)
-      .put("/userput")
-      .set("Authorization", `Bearer ${tokenPut}`)
-      .send({ name: "test" });
+  it('should return error if no user id', async () => {
+    mockReq.params.id = null;
 
-    expect(res.status).toBe(200);
-    expect(res.text).toBe("Modifié");
-    expect(res.headers["x-ratelimit-remaining"]).toEqual("18");
+    await rateLimiter(mockReq, mockRes, mockNext);
+
+    expect(mockNext).toHaveBeenCalledWith(expect.any(HttpError));
   });
 
-  it("PUT bloqué après trop de requêtes", async () => {
-    for (let i = 0; i < 10; i++) {
-      await request(app)
-        .put("/userput")
-        .set("Authorization", `Bearer ${tokenPut}`)
-        .send({ name: "test" });
-    }
-    const res = await request(app)
-      .put("/userput")
-      .set("Authorization", `Bearer ${tokenPut}`)
-      .send({ name: "limite" });
+  it('should return 429 if not enough tokens', async () => {
+    (getUserByIdFromDB as jest.Mock).mockResolvedValue({ ...mockUser, credit: 0 });
 
-    expect(res.headers["x-ratelimit-remaining"]).toEqual("0");
-    expect(res.status).toBe(429);
-  });
+    await rateLimiter(mockReq, mockRes, mockNext);
 
-  it("Refus sans token", async () => {
-    const res = await request(app).put("/user123").send({ name: "test" });
-    expect(res.status).toBe(401);
+    expect(mockRes.setHeader).toHaveBeenCalledWith("X-RateLimit-Remaining", 0);
+    expect(mockNext).toHaveBeenCalledWith(expect.any(HttpError));
   });
 });
-const mockUserGet = { id: "userGet", email: "testget@ikattan.com" };
-describe("Test rateLimite GET /:id", () => {
-  const app = express();
-  app.use(bodyParser.json());
 
-  app.use("/", userRoutes);
+describe('loginRateLimiter middleware', () => {
+  const mockReq: any = {
+    body: { email: 'test@example.com' },
+    method: 'POST',
+    path: '/login',
+    setHeader: jest.fn()
+  };
+  const mockRes: any = {
+    setHeader: jest.fn()
+  };
+  const mockNext = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (userRepo.getUserByIdFromDB as jest.Mock).mockResolvedValue(mockUserGet);
+    (getUserByEmailFromDB as jest.Mock).mockResolvedValue({ ...mockUser });
+    (modifyUserInDB as jest.Mock).mockResolvedValue(null);
   });
 
-  const newtoken = jwt.sign({ id: "userGet" }, "access-secret", {
-    expiresIn: "1h",
+  it('should call next if login credits are enough', async () => {
+    await loginRateLimiter(mockReq, mockRes, mockNext);
+
+    expect(mockRes.setHeader).toHaveBeenCalledWith("X-RateLimit-Remaining", expect.any(Number));
+    expect(mockNext).toHaveBeenCalledWith();
   });
 
-  it("GET autorisé avec token JWT valide", async () => {
-    const res = await request(app)
-      .get("/userGet")
-      .set("Authorization", `Bearer ${newtoken}`);
+  it('should throw error if email missing', async () => {
+    mockReq.body.email = undefined;
 
-    expect(res.status).toBe(200);
-    expect(res.headers["x-ratelimit-remaining"]).toEqual("19");
+    await loginRateLimiter(mockReq, mockRes, mockNext);
+
+    expect(mockNext).toHaveBeenCalledWith(expect.any(HttpError));
   });
 
-  it("GET bloqué après trop de requêtes", async () => {
-    for (let i = 0; i < 25; i++) {
-      await request(app)
-        .get("/userGet")
-        .set("Authorization", `Bearer ${newtoken}`);
-    }
-    const res = await request(app)
-      .get("/userGet")
-      .set("Authorization", `Bearer ${newtoken}`);
+  it('should return 429 if not enough login tokens', async () => {
+    (getUserByEmailFromDB as jest.Mock).mockResolvedValue({ ...mockUser, credit: 0 });
 
-    expect(res.status).toBe(429);
-    expect(res.headers["x-ratelimit-remaining"]).toEqual("0");
+    await loginRateLimiter(mockReq, mockRes, mockNext);
+
+    expect(mockNext).toHaveBeenCalledWith(expect.any(HttpError));
   });
 
-  it("Refus sans token", async () => {
-    const res = await request(app).get("/userGet");
-    expect(res.status).toBe(401);
-  });
-  it("Refus token invalide", async () => {
-    const res = await request(app)
-      .get("/userGet")
-      .set("Authorization", `Bearer invalidtoken`);
-    expect(res.status).toBe(403);
+  it('should return 401 if user not found in DB', async () => {
+    const mockReq: any = {
+      params: { id: 'invalid-id' },
+      method: 'GET',
+      setHeader: jest.fn()
+    };
+    const mockRes: any = {
+      setHeader: jest.fn()
+    };
+    const mockNext = jest.fn();
+
+    (getUserByIdFromDB as jest.Mock).mockResolvedValue(null); // simulate user not found
+
+    await rateLimiter(mockReq, mockRes, mockNext);
+
+    expect(mockRes.setHeader).toHaveBeenCalledWith("X-RateLimit-Remaining", 0);
+    expect(mockNext).toHaveBeenCalledWith(expect.any(HttpError));
+
+    const err = mockNext.mock.calls[0][0];
+    expect(err).toBeInstanceOf(HttpError);
+    expect(err.statusCode).toBe(401);
+    expect(err.message).toBe("User not found");
   });
 
-  it("refus user non trouvé", async () => {
-    (userRepo.getUserByIdFromDB as jest.Mock).mockResolvedValue(null);
-    const res = await request(app)
-      .get("/userGet")
-      .set("Authorization", `Bearer ${newtoken}`);
-    expect(res.status).toBe(401);
+  it('should return 429 if user has not enough tokens', async () => {
+    const mockUserId = 'user-123';
+
+    const mockReq: any = {
+      params: { id: mockUserId },
+      method: 'GET',
+      setHeader: jest.fn()
+    };
+    const mockRes: any = {
+      setHeader: jest.fn()
+    };
+    const mockNext = jest.fn();
+
+    // Simule un utilisateur valide
+    (getUserByIdFromDB as jest.Mock).mockResolvedValue({ id: mockUserId });
+
+    // Simule des crédits insuffisants
+    jest.spyOn(require("../../middleware/rateLimiteMiddleware"), "rateLimitMiddleware").mockResolvedValue({
+      tokens: 0,
+      lastRefill: Date.now()
+    });
+
+    await rateLimiter(mockReq, mockRes, mockNext);
+
+    expect(mockRes.setHeader).toHaveBeenCalledWith("X-RateLimit-Remaining", 0);
+    expect(mockNext).toHaveBeenCalledWith(expect.any(HttpError));
+
+    const err = mockNext.mock.calls[0][0];
+    expect(err).toBeInstanceOf(HttpError);
+    expect(err.statusCode).toBe(429);
+    expect(err.message).toBe("Trop de requêtes, veuillez patienter.");
+  });
+
+  it('should throw 401 if user is not found by email', async () => {
+    const mockReq: any = {
+      body: { email: 'nonexistent@example.com' },
+      method: 'POST',
+      path: '/login',
+    };
+    const mockRes: any = {
+      setHeader: jest.fn(),
+    };
+    const mockNext = jest.fn();
+
+    (getUserByEmailFromDB as jest.Mock).mockResolvedValue(undefined); // simulate not found
+
+    await loginRateLimiter(mockReq, mockRes, mockNext);
+
+    expect(mockNext).toHaveBeenCalledWith(expect.any(HttpError));
+
+    const error = mockNext.mock.calls[0][0];
+    expect(error).toBeInstanceOf(HttpError);
+    expect(error.statusCode).toBe(401);
+    expect(error.message).toBe("User not found");
+  });
+
+  it('should throw 429 if user does not have enough tokens for login', async () => {
+    const mockUser = { id: 'user-456', email: 'user@example.com' };
+
+    const mockReq: any = {
+      body: { email: mockUser.email },
+      method: 'POST',
+      path: '/login',
+    };
+    const mockRes: any = {
+      setHeader: jest.fn(),
+    };
+    const mockNext = jest.fn();
+
+    (getUserByEmailFromDB as jest.Mock).mockResolvedValue(mockUser);
+    (rateLimitMiddleware as jest.Mock).mockResolvedValue({
+      tokens: 4, // less than LOGIN cost (5)
+      lastRefill: Date.now(),
+    });
+
+    await loginRateLimiter(mockReq, mockRes, mockNext);
+
+    expect(mockNext).toHaveBeenCalledWith(expect.any(HttpError));
+    const error = mockNext.mock.calls[0][0];
+    expect(error).toBeInstanceOf(HttpError);
+    expect(error.statusCode).toBe(429);
+    expect(error.message).toBe("Trop de requêtes, veuillez patienter.");
   });
 });

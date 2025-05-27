@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import { HttpError } from "../classes/httpError";
-import { getUserByEmailFromDB, getUserByIdFromDB } from "../Repo/userRepo";
+import { getUserByEmailFromDB, getUserByIdFromDB, modifyUserInDB } from "../Repo/userRepo";
 
 type RateLimitData = {
   tokens: number;
@@ -17,10 +17,10 @@ const COSTS: { [method: string]: number } = {
   PUT: 2,
 };
 
-export const rateLimitMiddleware = (userId: string): RateLimitData => {
+export const rateLimitMiddleware = async (userId: string): Promise<RateLimitData> => {
   const now = Date.now();
 
-  if (!RATE_LIMIT[userId]) {
+  /*if (!RATE_LIMIT[userId]) {
     RATE_LIMIT[userId] = {
       tokens: MAX_TOKENS,
       lastRefill: now,
@@ -31,9 +31,24 @@ export const rateLimitMiddleware = (userId: string): RateLimitData => {
   const minutesPassed = (now - rateData.lastRefill) / (60 * 1000);
 
 
-    const tokensToAdd = Math.floor(minutesPassed * REFILL_RATE);
-    rateData.tokens = Math.min(MAX_TOKENS, rateData.tokens + tokensToAdd);
-    rateData.lastRefill = now;
+  const tokensToAdd = Math.floor(minutesPassed * REFILL_RATE);
+  rateData.tokens = Math.min(MAX_TOKENS, rateData.tokens + tokensToAdd);
+  rateData.lastRefill = now;*/
+
+  console.log('User ID:', userId);
+  const user = await getUserByIdFromDB(userId);
+  if (!user) {
+    throw new HttpError("User not found", 404);
+  }
+  const rateData: RateLimitData = {
+    tokens: user.credit,
+    lastRefill: user.creditLastUpdated ? new Date(user.creditLastUpdated).getTime() : now,
+  };
+  const tokensToAdd = Math.floor((now - rateData.lastRefill) / (60 * 1000) * REFILL_RATE);
+  rateData.tokens = Math.min(MAX_TOKENS, rateData.tokens + tokensToAdd);
+  rateData.lastRefill = now;
+  await modifyUserInDB(userId, { credit: rateData.tokens, creditLastUpdated: new Date() });
+
   return rateData;
 };
 
@@ -54,7 +69,7 @@ export const rateLimiter: RequestHandler = async (req, res, next) => {
     }
 
     const userId = user.id;
-    const rateData = rateLimitMiddleware(userId);
+    const rateData = await rateLimitMiddleware(userId);
 
     const method = req.method.toUpperCase();
     const cost = COSTS[method] ?? 1;
@@ -65,9 +80,8 @@ export const rateLimiter: RequestHandler = async (req, res, next) => {
     }
 
     rateData.tokens = Math.max(0, rateData.tokens - cost);
-    console.log(
-      `User ${userId} - Credit left: ${rateData.tokens} - Cost: ${cost} - Method: ${method}`
-    );
+    await modifyUserInDB(userId, { credit: rateData.tokens, creditLastUpdated: new Date() });
+    //console.log(`User ${userId} - Credit left: ${rateData.tokens} - Cost: ${cost} - Method: ${method}`);
     res.setHeader("X-RateLimit-Remaining", rateData.tokens);
     return next();
   } catch (err) {
@@ -83,7 +97,7 @@ export const loginRateLimiter: RequestHandler = async (req, res, next) => {
     const user = await getUserByEmailFromDB(email);
     if (!user) throw new HttpError("User not found", 401);
 
-    const rateData = rateLimitMiddleware(user.id);
+    const rateData = await rateLimitMiddleware(user.id);
 
     let method = req.method.toUpperCase();
     if (req.path === "/login") method = "LOGIN";
@@ -95,9 +109,9 @@ export const loginRateLimiter: RequestHandler = async (req, res, next) => {
     }
     rateData.tokens = Math.max(0, rateData.tokens - cost);
 
-    console.log(
-      `User ${user.id} - Credit left: ${rateData.tokens} - Cost: ${cost} - Method: ${method}`
-    );
+    await modifyUserInDB(user.id, { credit: rateData.tokens, creditLastUpdated: new Date() });
+
+    //console.log(`User ${user.id} - Credit left: ${rateData.tokens} - Cost: ${cost} - Method: ${method}`);
 
     res.setHeader("X-RateLimit-Remaining", rateData.tokens);
     return next();

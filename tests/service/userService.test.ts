@@ -97,6 +97,7 @@ describe('userService', () => {
         expect(userRepo.addUserToDB).toHaveBeenCalledWith({
             id: expect.any(String),
             credit: 20,
+            creditLastUpdated: expect.any(Date),
             nom: mockUserInput.nom,
             prenom: mockUserInput.prenom,
             age: mockUserInput.age,
@@ -128,6 +129,7 @@ describe('userService', () => {
         expect(userRepo.addUserToDB).toHaveBeenCalledWith({
             id: expect.any(String),
             credit: 20,
+            creditLastUpdated: expect.any(Date),
             nom: mockUserInput.nom,
             prenom: mockUserInput.prenom,
             age: mockUserInput.age,

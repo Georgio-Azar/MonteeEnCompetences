@@ -11,7 +11,7 @@ async function getUsersService() {
     const usersFromDB = await userRepo.getUsersFromDB();
     if (usersFromDB.length > 0) {
         let usersDTO = usersFromDB.map((user) => {
-            return new UserDTO(user.id, user.nom, user.prenom, user.age, user.email, user.credit);
+            return new UserDTO(user.id, user.nom, user.prenom, user.age, user.email, user.credit, user.creditLastUpdated);
         });
         return usersDTO;
     }
@@ -50,11 +50,12 @@ async function addUserService(userInput: any) {
         age: validatedUser.age,
         email: validatedUser.email,
         password: hashedPassword,
-        credit: 20
+        credit: 20,
+        creditLastUpdated: new Date()
     };
     let createdUser = await userRepo.addUserToDB(userInputToAdd);
     if (createdUser) {
-        return new UserDTO(createdUser.id, createdUser.nom, createdUser.prenom, createdUser.age, createdUser.email, createdUser.credit);
+        return new UserDTO(createdUser.id, createdUser.nom, createdUser.prenom, createdUser.age, createdUser.email, createdUser.credit, createdUser.creditLastUpdated);
     }
     else {
         throw new HttpError('User not created', 500);
@@ -76,7 +77,7 @@ async function modifyUserService(id: string, userInput: any) {
     }
     let updatedUser = await userRepo.modifyUserInDB(id, validatedUser);
     if (updatedUser !== null) {
-        return new UserDTO(updatedUser.id, updatedUser.nom, updatedUser.prenom, updatedUser.age, updatedUser.email, updatedUser.credit);
+        return new UserDTO(updatedUser.id, updatedUser.nom, updatedUser.prenom, updatedUser.age, updatedUser.email, updatedUser.credit, updatedUser.creditLastUpdated);
     } else {
         throw new HttpError('User not found', 404);
     }

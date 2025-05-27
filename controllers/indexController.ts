@@ -1,6 +1,6 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
-function indexWelcome (res : Response)  {
+function indexWelcome (req: Request, res : Response)  {
     res.send('Hello World!');
 }
 

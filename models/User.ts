@@ -18,6 +18,7 @@ interface UserAttributes {
   email: string;
   password: string;
   credit: number;
+  creditLastUpdated: Date;
 }
 
 @Table({
@@ -54,5 +55,10 @@ export class User extends Model<UserAttributes> {
   @AllowNull(false)
   @Column(DataType.INTEGER)
   credit!: number;
+
+  @AllowNull(false)
+  @Default(DataType.NOW)
+  @Column(DataType.DATE)
+  creditLastUpdated!: Date;
 
 }

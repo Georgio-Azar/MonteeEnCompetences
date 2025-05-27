@@ -13,6 +13,8 @@ type userToModify = {
     age?: number;
     email?: string;
     password?: string;
+    credit?: number;
+    creditLastUpdated?: Date;
 }
 
 export type {

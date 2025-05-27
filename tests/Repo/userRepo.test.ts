@@ -22,6 +22,7 @@ beforeAll(async () => {
             email: 'jean.dupont@example.com',
             password: 'SecureP@ssword123',
             credit: 20,
+            creditLastUpdated: new Date(),
         }
     ]);
 })
@@ -52,6 +53,7 @@ describe("userRepo", () => {
             email: 'jean.dupont@example.com',
             password: 'SecureP@ssword123',
             credit: 20,
+            creditLastUpdated: new Date(),
         }
     ]);
         const user = await userRepo.getUserByIdFromDB('1');
@@ -61,9 +63,8 @@ describe("userRepo", () => {
 
     it ("should return that no user was found", async() => {
         await expect(userRepo.getUserByIdFromDB('999')).rejects.toThrow('User not found');
-    })
+    
 
-    it ("should add a user to the database", async() => {
         const newUser = {
             id: '2',
             nom: 'Marie',
@@ -72,7 +73,8 @@ describe("userRepo", () => {
             email: 'Marie.Curie@gmail.com',
             password: 'Mcp@ssw0rd123',
             credit: 20,
-        }
+            creditLastUpdated: new Date(),
+        };
         const user = await userRepo.addUserToDB(newUser);
         expect(user).toBeDefined();
         expect(user.id).toBe('2');
